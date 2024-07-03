@@ -10,7 +10,7 @@ import wandb
 from segmentation_models_pytorch.losses import (DiceLoss, JaccardLoss,
                                                 LovaszLoss)
 from torchvision.ops import sigmoid_focal_loss
-
+import matplotlib.pyplot as plt
 
 class BaseModel(pl.LightningModule, ABC):
     """_summary_ Base model class for all models in this project. Implements the training, validation and test steps, 
@@ -257,7 +257,21 @@ class BaseModel(pl.LightningModule, ABC):
         )
         wandb.log({"Test confusion matrix": wandb_table})
 
-        fig, ax = self.test_pr_curve.plot(score=True)
+        #fig, ax = self.test_pr_curve.plot(score=True)
+
+        # Compute precision and recall
+        precision, recall, thresholds = self.test_pr_curve.compute()
+
+        # Move tensors to CPU
+        precision = precision.cpu().numpy()
+        recall = recall.cpu().numpy()
+
+        # Plot the PR curve using Matplotlib
+        fig, ax = plt.subplots() 
+        ax.plot(recall, precision, marker='.')
+        ax.set_xlabel('Recall')
+        ax.set_ylabel('Precision')
+        ax.set_title('Precision-Recall Curve')
         wandb.log({"Test PR Curve": fig})
 
     def predict_step(self, batch, batch_idx, dataloader_idx=0):
