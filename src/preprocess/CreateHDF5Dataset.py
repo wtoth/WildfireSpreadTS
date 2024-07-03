@@ -27,7 +27,7 @@ dataset = FireSpreadDataset(data_dir=args.data_dir,
                             included_fire_years=years,
                             # the following args are irrelevant here, but need to be set
                             n_leading_observations=1, crop_side_length=128, load_from_hdf5=False, is_train=True,
-                            remove_duplicate_features=False)
+                            remove_duplicate_features=False, stats_years=(2018, 2020))
 data_gen = dataset.get_generator_for_hdf5()
 
 
@@ -59,4 +59,4 @@ for year, fire_name, img_dates, lnglat, imgs in tqdm(data_gen):
 
     # shutil.move(h5_path, target_dir)
 
-    break
+    #break
