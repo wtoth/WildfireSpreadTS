@@ -3,3 +3,7 @@ from .ConvLSTMLightning import ConvLSTMLightning
 from .LogisticRegression import LogisticRegression
 from .SMPModel import SMPModel
 from .UTAELightning import UTAELightning
+from .TSViTLightning import TSViTLightning
+from .TSViTLightningSeb import TSViTLightningSeb
+from .TransformerLightning import TransformerLightning
+from .SwinUnetLightning import SwinUNet

@@ -179,7 +179,6 @@ class FireSpreadDataset(Dataset):
         # time step, therefore, we flatten the temporal dimension.
         if self.remove_duplicate_features and self.n_leading_observations > 1:
             x = self.flatten_and_remove_duplicate_features_(x)
-        
         # Discard features that we don't want to use
         elif self.features_to_keep is not None:
             if len(x.shape) != 4:
