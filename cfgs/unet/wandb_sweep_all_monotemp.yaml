@@ -38,5 +38,5 @@ parameters:
   trainer.max_steps: 
     value: 10000
   do_test:
-    value: True
+    value: False
 program: src/train.py

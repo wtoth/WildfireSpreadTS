@@ -16,4 +16,4 @@ model:
 
 do_train: true
 do_predict: false
-do_test: true
+do_test: false
