@@ -106,6 +106,7 @@ def main():
         cli.trainer.test(cli.model, cli.datamodule, ckpt_path=ckpt)
 
     if cli.config.do_predict:
+        print(f"Loading checkpoint from: {ckpt}")
 
         # Produce predictions, save them in a single file, including ground truth fire targets and input fire masks.
         prediction_output = cli.trainer.predict(

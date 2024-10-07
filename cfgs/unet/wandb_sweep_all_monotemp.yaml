@@ -3,9 +3,9 @@ command:
   - python
   - ${program}
   - -c
-  - cfgs/unet/res18_monotemporal.yaml
+  - cfgs/unet/res50_monotemporal.yaml
   - --trainer
-  - cfgs/trainer_multi_gpu.yaml
+  - cfgs/trainer_single_gpu.yaml
   - --data
   - cfgs/data_monotemporal_full_features.yaml
   - ${args}
@@ -38,5 +38,5 @@ parameters:
   trainer.max_steps: 
     value: 10000
   do_test:
-    value: False
+    value: true
 program: src/train.py

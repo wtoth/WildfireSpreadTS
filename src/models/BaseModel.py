@@ -7,6 +7,7 @@ import torch
 import torch.nn as nn
 import torchmetrics
 import wandb
+import torchvision.transforms.functional as TF
 from segmentation_models_pytorch.losses import (DiceLoss, JaccardLoss,
                                                 LovaszLoss)
 from torchvision.ops import sigmoid_focal_loss
@@ -24,7 +25,9 @@ class BaseModel(pl.LightningModule, ABC):
         pos_class_weight: float,
         loss_function: Literal["BCE", "Focal", "Lovasz", "Jaccard", "Dice"],
         use_doy: bool = False,
+        crop_before_eval: bool = False,
         required_img_size: Optional[Tuple[int, int]] = None,
+
         *args: Any,
         **kwargs: Any
     ):
@@ -149,6 +152,24 @@ class BaseModel(pl.LightningModule, ABC):
 
         return y_hat, y
 
+    def center_crop(self, x, y, crop_size=128):
+        """_summary_ Crops the center of the image to 128x128, 
+        Only used for computing the test performance.
+
+        Args:
+            x (_type_): _description_
+            y (_type_): _description_
+
+        Returns:
+            _type_: _description_
+        """
+        H_new, W_new = crop_size, crop_size
+        x = TF.center_crop(x, (H_new, W_new))
+        y = TF.center_crop(y, (H_new, W_new))
+        
+        return x, y
+
+
     def training_step(self, batch, batch_idx):
         """_summary_ Compute predictions and loss for the given batch. Log training loss and F1 score.
 
@@ -160,6 +181,10 @@ class BaseModel(pl.LightningModule, ABC):
             _type_: _description_
         """
         y_hat, y = self.get_pred_and_gt(batch)
+
+        if self.hparams.crop_before_eval:
+            #print("Center cropping before eval...")
+            y_hat, y = self.center_crop(y_hat, y)
 
         loss = self.compute_loss(y_hat, y)
         f1 = self.train_f1(y_hat, y)
@@ -194,6 +219,9 @@ class BaseModel(pl.LightningModule, ABC):
         """
         y_hat, y = self.get_pred_and_gt(batch)
 
+        if self.hparams.crop_before_eval:
+            y_hat, y = self.center_crop(y_hat, y)
+
         loss = self.compute_loss(y_hat, y)
         f1 = self.val_f1(y_hat, y)
         self.log(
@@ -227,6 +255,9 @@ class BaseModel(pl.LightningModule, ABC):
         """
         y_hat, y = self.get_pred_and_gt(batch)
 
+        if self.hparams.crop_before_eval:
+            y_hat, y = self.center_crop(y_hat, y)
+
         loss = self.compute_loss(y_hat, y)
         self.test_f1(y_hat, y)
         self.test_avg_precision(y_hat, y)
@@ -251,32 +282,33 @@ class BaseModel(pl.LightningModule, ABC):
     def on_test_epoch_end(self) -> None:
         """_summary_ Log the test PR curve and confusion matrix after predicting all test samples.
         """
-        conf_mat = self.conf_mat.compute().cpu().numpy()
-        wandb_table = wandb.Table(
-            data=conf_mat, columns=["PredictedBackground", "PredictedFire"]
-        )
-        wandb.log({"Test confusion matrix": wandb_table})
+        #conf_mat = self.conf_mat.compute().cpu().numpy()
+        #wandb_table = wandb.Table(
+        #    data=conf_mat, columns=["PredictedBackground", "PredictedFire"]
+        #)
+        #wandb.log({"Test confusion matrix": wandb_table})
 
         #fig, ax = self.test_pr_curve.plot(score=True)
 
-        # Compute precision and recall
-        precision, recall, thresholds = self.test_pr_curve.compute()
+        # # Compute precision and recall
+        # precision, recall, thresholds = self.test_pr_curve.compute()
 
-        # Move tensors to CPU
-        precision = precision.cpu().numpy()
-        recall = recall.cpu().numpy()
+        # # Move tensors to CPU
+        # precision = precision.cpu().numpy()
+        # recall = recall.cpu().numpy()
 
-        # Plot the PR curve using Matplotlib
-        fig, ax = plt.subplots() 
-        ax.plot(recall, precision, marker='.')
-        ax.set_xlabel('Recall')
-        ax.set_ylabel('Precision')
-        ax.set_title('Precision-Recall Curve')
-        wandb.log({"Test PR Curve": fig})
+        # # Plot the PR curve using Matplotlib
+        # fig, ax = plt.subplots() 
+        # ax.plot(recall, precision, marker='.')
+        # ax.set_xlabel('Recall')
+        # ax.set_ylabel('Precision')
+        # ax.set_title('Precision-Recall Curve')
+        #wandb.log({"Test PR Curve": wandb.Image(fig)})
 
     def predict_step(self, batch, batch_idx, dataloader_idx=0):
         x, y = batch
-        x_af = x[:, :, -1, :, :]
+        
+        x_af = x[:, -1, :, :]
         y_hat = self(x).squeeze(1)
         return x_af, y, y_hat
 
