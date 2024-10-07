@@ -12,7 +12,8 @@ class FireSpreadDataModule(LightningDataModule):
 
     def __init__(self, data_dir: str, batch_size: int, n_leading_observations: int, n_leading_observations_test_adjustment: int,
                  crop_side_length: int,
-                 load_from_hdf5: bool, num_workers: int, remove_duplicate_features: bool,
+                 load_from_hdf5: bool, num_workers: int, remove_duplicate_features: bool, 
+                 is_pad: Optional[bool] = False,
                  features_to_keep: Union[Optional[List[int]], str] = None, return_doy: bool = False,
                  data_fold_id: int = 0, *args, **kwargs):
         """_summary_ Data module for loading the WildfireSpreadTS dataset.
@@ -50,8 +51,9 @@ class FireSpreadDataModule(LightningDataModule):
         self.data_dir = data_dir
         self.batch_size = batch_size
         self.train_dataset, self.val_dataset, self.test_dataset = None, None, None
+        self.is_pad=is_pad
 
-    def setup(self, stage: str):
+    def setup(self, stage):
         train_years, val_years, test_years = self.split_fires(
             self.data_fold_id)
         self.train_dataset = FireSpreadDataset(data_dir=self.data_dir, included_fire_years=train_years,
@@ -61,7 +63,7 @@ class FireSpreadDataModule(LightningDataModule):
                                                load_from_hdf5=self.load_from_hdf5, is_train=True,
                                                remove_duplicate_features=self.remove_duplicate_features,
                                                features_to_keep=self.features_to_keep, return_doy=self.return_doy,
-                                               stats_years=train_years)
+                                               stats_years=train_years, is_pad=self.is_pad)
         self.val_dataset = FireSpreadDataset(data_dir=self.data_dir, included_fire_years=val_years,
                                              n_leading_observations=self.n_leading_observations,
                                              n_leading_observations_test_adjustment=None,
@@ -69,7 +71,7 @@ class FireSpreadDataModule(LightningDataModule):
                                              load_from_hdf5=self.load_from_hdf5, is_train=True,
                                              remove_duplicate_features=self.remove_duplicate_features,
                                              features_to_keep=self.features_to_keep, return_doy=self.return_doy,
-                                             stats_years=train_years)
+                                             stats_years=train_years, is_pad=self.is_pad)
         self.test_dataset = FireSpreadDataset(data_dir=self.data_dir, included_fire_years=test_years,
                                               n_leading_observations=self.n_leading_observations,
                                               n_leading_observations_test_adjustment=self.n_leading_observations_test_adjustment,
@@ -77,7 +79,7 @@ class FireSpreadDataModule(LightningDataModule):
                                               load_from_hdf5=self.load_from_hdf5, is_train=False,
                                               remove_duplicate_features=self.remove_duplicate_features,
                                               features_to_keep=self.features_to_keep, return_doy=self.return_doy,
-                                              stats_years=train_years)
+                                              stats_years=train_years, is_pad=self.is_pad)
 
     def train_dataloader(self):
         return DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers, pin_memory=True)

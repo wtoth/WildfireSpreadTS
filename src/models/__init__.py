@@ -6,4 +6,4 @@ from .UTAELightning import UTAELightning
 from .TSViTLightning import TSViTLightning
 from .TSViTLightningSeb import TSViTLightningSeb
 from .TransformerLightning import TransformerLightning
-from .SwinUnetLightning import SwinUNet
+from .SwinUnetLightning import SwinUnetLightning
