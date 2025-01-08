@@ -7,4 +7,4 @@ num_workers: 32
 remove_duplicate_features: True
 features_to_keep: [0, 1, 2, 3, 4, 38, 39]
 n_leading_observations_test_adjustment: 5
-desired_side_length: 224
+is_pad: true

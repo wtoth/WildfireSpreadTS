@@ -1,3 +1,5 @@
+# README from the official repo
+
 # WildfireSpreadTS: A dataset of multi-modal time series for wildfire spread prediction
 
 This repository contains the code corresponding to the paper with the name above. 

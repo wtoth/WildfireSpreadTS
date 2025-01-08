@@ -2,7 +2,7 @@ from pathlib import Path
 
 import numpy as np
 from pytorch_lightning import LightningDataModule
-from torch.utils.data import DataLoader
+from torch.utils.data import Subset, DataLoader
 import glob
 from .FireSpreadDataset import FireSpreadDataset
 from typing import List, Optional, Union
@@ -15,7 +15,7 @@ class FireSpreadDataModule(LightningDataModule):
                  load_from_hdf5: bool, num_workers: int, remove_duplicate_features: bool, 
                  is_pad: Optional[bool] = False,
                  features_to_keep: Union[Optional[List[int]], str] = None, return_doy: bool = False,
-                 data_fold_id: int = 0, *args, **kwargs):
+                 data_fold_id: int = 0, non_outlier_indices_path: Optional[str] = None, *args, **kwargs):
         """_summary_ Data module for loading the WildfireSpreadTS dataset.
 
         Args:
@@ -52,6 +52,7 @@ class FireSpreadDataModule(LightningDataModule):
         self.batch_size = batch_size
         self.train_dataset, self.val_dataset, self.test_dataset = None, None, None
         self.is_pad=is_pad
+        self.non_outlier_indices_path = non_outlier_indices_path
 
     def setup(self, stage):
         train_years, val_years, test_years = self.split_fires(
@@ -64,6 +65,12 @@ class FireSpreadDataModule(LightningDataModule):
                                                remove_duplicate_features=self.remove_duplicate_features,
                                                features_to_keep=self.features_to_keep, return_doy=self.return_doy,
                                                stats_years=train_years, is_pad=self.is_pad)
+        
+        if self.non_outlier_indices_path is not None:
+            non_outlier_indices = np.load(self.non_outlier_indices_path).tolist()
+            print(f"Subsetting train_loader using {self.non_outlier_indices_path}")
+            self.train_dataset = Subset(self.train_dataset, non_outlier_indices)
+        
         self.val_dataset = FireSpreadDataset(data_dir=self.data_dir, included_fire_years=val_years,
                                              n_leading_observations=self.n_leading_observations,
                                              n_leading_observations_test_adjustment=None,
