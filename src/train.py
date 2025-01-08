@@ -111,6 +111,7 @@ def main():
         # Produce predictions, save them in a single file, including ground truth fire targets and input fire masks.
         prediction_output = cli.trainer.predict(
             cli.model, cli.datamodule, ckpt_path=ckpt)
+        #torch.save(prediction_output, "prediction_output.pt")
         x_af = torch.cat(
             list(map(lambda tup: tup[0][:, -1, :, :].squeeze(), prediction_output)), axis=0)
         y = torch.cat(list(map(lambda tup: tup[1], prediction_output)), axis=0)

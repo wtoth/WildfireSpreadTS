@@ -17,4 +17,5 @@ model:
 do_train: false
 do_predict: true
 do_test: false
-ckpt_path: /home/sl636/WildfireSpreadTS/lightning_logs/wildfire_progression/ixy6crcj/checkpoints/epoch=44-step=3510.ckpt
+ckpt_path: /home/sl221120/WildfireSpreadTS/lightning_logs/wildfire_progression/ycol26xd/checkpoints/epoch=32-step=3993.ckpt
+

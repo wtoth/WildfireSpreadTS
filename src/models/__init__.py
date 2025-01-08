@@ -7,3 +7,6 @@ from .TSViTLightning import TSViTLightning
 from .TSViTLightningSeb import TSViTLightningSeb
 from .TransformerLightning import TransformerLightning
 from .SwinUnetLightning import SwinUnetLightning
+from .SwinUnetTempLightning import SwinUnetTempLightning
+from .SwinUnetTempDumbLightning import SwinUnetTempDumbLightning
+from .UTAELightningDumb import UTAELightningDumb
