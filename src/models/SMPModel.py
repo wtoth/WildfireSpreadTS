@@ -26,7 +26,7 @@ class SMPModel(BaseModel):
             **kwargs
         )
         self.save_hyperparameters()
-        
+        encoder_weights = encoder_weights if encoder_weights != "none" else None
         self.model = smp.Unet(
             encoder_name=encoder_name,  # choose encoder, e.g. mobilenet_v2 or efficientnet-b7
             encoder_weights=encoder_weights,  # use `imagenet` pre-trained weights for encoder initialization

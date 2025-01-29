@@ -14,6 +14,7 @@ class UTAELightning(BaseModel):
         n_channels: int,
         flatten_temporal_dimension: bool,
         pos_class_weight: float,
+        encoder_weights = None,
         *args: Any,
         **kwargs: Any
     ):
@@ -44,6 +45,36 @@ class UTAELightning(BaseModel):
             pad_value=0,
             padding_mode="reflect",
         )
+        encoder_weights = encoder_weights if encoder_weights != "none" else None
+        if encoder_weights == "pastis": 
+            pretrained_checkpoint = '/home/sl221120/WildfireSpreadTS/src/models/utae_paps_models/model.pth.tar'
+            self.load_checkpoint(pretrained_checkpoint)
+
+
+    def load_checkpoint(self, checkpoint_path: str) -> None:
+        """Load a pretrained checkpoint for the model.
+
+        Args:
+            checkpoint_path (str): Path to the checkpoint file.
+        """
+        checkpoint = torch.load(checkpoint_path)
+        state_dict = checkpoint["state_dict"]
+        prefix = "encoder."
+        new_state_dict = {}
+        for key, value in state_dict.items():
+            if key.startswith(prefix):
+                new_state_dict[key[len(prefix):]] = value
+            else:
+                new_state_dict[key] = value
+        model_state_dict = self.model.state_dict()
+        filtered_state_dict = {
+            k: v
+            for k, v in new_state_dict.items()
+            if k in model_state_dict and model_state_dict[k].size() == v.size()
+        }
+        # Load the weights into the model
+        self.model.load_state_dict(filtered_state_dict, strict=False)
+        print(f"Checkpoint loaded successfully from '{checkpoint_path}'")
 
     def forward(self, x: torch.Tensor, doys: torch.Tensor) -> torch.Tensor:
         return self.model(x, batch_positions=doys, return_att=False)

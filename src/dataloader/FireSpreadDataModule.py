@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import numpy as np
+import torch
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import Subset, DataLoader
 import glob
@@ -15,7 +16,8 @@ class FireSpreadDataModule(LightningDataModule):
                  load_from_hdf5: bool, num_workers: int, remove_duplicate_features: bool, 
                  is_pad: Optional[bool] = False,
                  features_to_keep: Union[Optional[List[int]], str] = None, return_doy: bool = False,
-                 data_fold_id: int = 0, non_outlier_indices_path: Optional[str] = None, *args, **kwargs):
+                 data_fold_id: int = 0, non_outlier_indices_path: Optional[str] = None, filter_ignition_train: Optional[bool] = False, filter_ignition_val_test: Optional[bool] = False,
+                 ignition_only_train: Optional[bool] = False, ignition_only_val_test: Optional[bool] = False, *args, **kwargs):
         """_summary_ Data module for loading the WildfireSpreadTS dataset.
 
         Args:
@@ -53,7 +55,54 @@ class FireSpreadDataModule(LightningDataModule):
         self.train_dataset, self.val_dataset, self.test_dataset = None, None, None
         self.is_pad=is_pad
         self.non_outlier_indices_path = non_outlier_indices_path
+        self.filter_ignition_train = filter_ignition_train
+        self.filter_ignition_val_test = filter_ignition_val_test
+        self.ignition_only_train = ignition_only_train
+        self.ignition_only_val_test = ignition_only_val_test
 
+
+    def keep_ignition(self, dataset):
+        ignition_indices = []
+        total_samples = len(dataset)
+        kept = 0
+        
+        for idx in range(total_samples):
+            sample = dataset[idx]
+            inputs = sample[0]  # Shape: [1, 7, 128, 128]
+            x_af = inputs[:, -1, :, :]  # Active fire mask
+            
+            # Check current fire presence
+            if torch.sum(x_af == 1) < 1:  # Original filtering condition
+                ignition_indices.append(idx)
+                kept += 1
+    
+        # Print detailed statistics
+        print(f"Total samples: {total_samples}")
+        print(f"Kept samples (ignition): {kept} ({kept/total_samples:.2%})")
+        print(f"Discarded samples: {total_samples - kept} ({(total_samples - kept)/total_samples:.2%})")
+        return Subset(dataset, ignition_indices)
+
+    def filter_dataset(self, dataset):
+        valid_indices = []
+        total_samples = len(dataset)
+        kept = 0
+        for idx in range(total_samples):
+            sample = dataset[idx]
+            inputs = sample[0]  # Shape: [1, 7, 128, 128]
+            x_af = inputs[:, -1, :, :]  # Active fire mask
+            
+            # Check current fire presence
+            if torch.sum(x_af == 1) > 1:  # Original filtering condition
+                valid_indices.append(idx)
+                kept += 1
+        
+        # Print detailed statistics
+        print(f"Total samples: {total_samples}")
+        print(f"Kept samples (current fire): {kept} ({kept/total_samples:.2%})")
+        print(f"Discarded samples: {total_samples - kept} ({(total_samples - kept)/total_samples:.2%})")
+        
+        return Subset(dataset, valid_indices)
+        
     def setup(self, stage):
         train_years, val_years, test_years = self.split_fires(
             self.data_fold_id)
@@ -70,6 +119,13 @@ class FireSpreadDataModule(LightningDataModule):
             non_outlier_indices = np.load(self.non_outlier_indices_path).tolist()
             print(f"Subsetting train_loader using {self.non_outlier_indices_path}")
             self.train_dataset = Subset(self.train_dataset, non_outlier_indices)
+
+        if self.filter_ignition_train:
+            self.train_dataset = self.filter_dataset(self.train_dataset)
+
+        if self.ignition_only_train:
+            self.train_dataset = self.keep_ignition(self.train_dataset)
+
         
         self.val_dataset = FireSpreadDataset(data_dir=self.data_dir, included_fire_years=val_years,
                                              n_leading_observations=self.n_leading_observations,
@@ -87,6 +143,14 @@ class FireSpreadDataModule(LightningDataModule):
                                               remove_duplicate_features=self.remove_duplicate_features,
                                               features_to_keep=self.features_to_keep, return_doy=self.return_doy,
                                               stats_years=train_years, is_pad=self.is_pad)
+
+        if self.filter_ignition_val_test:
+            self.val_dataset = self.filter_dataset(self.val_dataset)
+            self.test_dataset = self.filter_dataset(self.test_dataset)
+            
+        if self.ignition_only_val_test:
+            self.val_dataset = self.keep_ignition(self.val_dataset)
+            self.test_dataset = self.keep_ignition(self.test_dataset)
 
     def train_dataloader(self):
         return DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers, pin_memory=True)

@@ -27,7 +27,7 @@ class BaseModel(pl.LightningModule, ABC):
         use_doy: bool = False,
         crop_before_eval: bool = False,
         required_img_size: Optional[Tuple[int, int]] = None,
-
+        alpha_focal: Optional[float] = None,
         *args: Any,
         **kwargs: Any
     ):
@@ -64,6 +64,8 @@ class BaseModel(pl.LightningModule, ABC):
         self.test_f1 = self.train_f1.clone()
 
         self.test_avg_precision = torchmetrics.AveragePrecision("binary")
+
+        self.val_avg_precision = self.test_avg_precision.clone()
         self.test_precision = torchmetrics.Precision("binary")
         self.test_recall = torchmetrics.Recall("binary")
         self.test_iou = torchmetrics.JaccardIndex("binary")
@@ -208,7 +210,7 @@ class BaseModel(pl.LightningModule, ABC):
         return loss
 
     def validation_step(self, batch, batch_idx):
-        """_summary_ Compute predictions and loss for the given batch. Log validation loss and F1 score.
+        """_summary_ Compute predictions and loss for the given batch. Log validation loss, AP, and F1 score.
 
         Args:
             batch (_type_): _description_
@@ -223,6 +225,8 @@ class BaseModel(pl.LightningModule, ABC):
             y_hat, y = self.center_crop(y_hat, y)
 
         loss = self.compute_loss(y_hat, y)
+        # changing to val ap to match test metric
+        ap = self.val_avg_precision(y_hat, y)
         f1 = self.val_f1(y_hat, y)
         self.log(
             "val_loss",
@@ -232,6 +236,14 @@ class BaseModel(pl.LightningModule, ABC):
             prog_bar=True,
             logger=True,
             sync_dist=True,
+        )
+        self.log(
+            "val_avg_precision",
+            self.val_avg_precision,
+            on_step=False,
+            on_epoch=True,
+            prog_bar=True,
+            logger=True,
         )
         self.log(
             "val_f1",
@@ -333,6 +345,7 @@ class BaseModel(pl.LightningModule, ABC):
             return self.loss(
                 y_hat,
                 y.float(),
+                #alpha=self.hparams.alpha_focal,
                 alpha=1 - self.hparams.pos_class_weight,
                 gamma=2,
                 reduction="mean",
