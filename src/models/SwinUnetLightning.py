@@ -14,6 +14,7 @@ class SwinUnetLightning(BaseModel):
         n_channels: int,
         flatten_temporal_dimension: bool,
         pos_class_weight: float,
+        encoder_weights = None,
         *args: Any,
         **kwargs: Any
     ):
@@ -24,7 +25,9 @@ class SwinUnetLightning(BaseModel):
             use_doy=False, 
             *args,
             **kwargs
-        )        
+        )
+        encoder_weights = encoder_weights if encoder_weights != "none" else None
+        
         class Config:
             class DATA:
                 IMG_SIZE = 224 
@@ -34,8 +37,10 @@ class SwinUnetLightning(BaseModel):
                 DROP_PATH_RATE = 0.2
                 LABEL_SMOOTHING = 0.1
                 NAME = 'swin_tiny_patch4_window7_224'
-                PRETRAIN_CKPT = None #'src/models/SwinUnet/networks/swin_tiny_patch4_window7_224.pth'
-        
+                if encoder_weights == "imagenet":
+                    PRETRAIN_CKPT = 'src/models/SwinUnet/networks/swin_tiny_patch4_window7_224.pth'
+                else:
+                    PRETRAIN_CKPT = None
                 
                 class SWIN:
                     PATCH_SIZE = 4 

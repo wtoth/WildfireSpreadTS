@@ -79,6 +79,7 @@ class MyLightningCLI(LightningCLI):
         wandb.define_metric("val_loss", summary="min")
         wandb.define_metric("train_f1_epoch", summary="max")
         wandb.define_metric("val_f1", summary="max")
+        wandb.define_metric("val_avg_precision", summary="max")
 
 
 def main():
