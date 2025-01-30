@@ -1,13 +1,13 @@
-from src.dataloader.FireSpreadDataset import FireSpreadDataset
 import argparse
 import os
 import sys
+sys.path.append(os.path.abspath(os.path.dirname(__file__).split("/src")[-2]))
+from src.dataloader.FireSpreadDataset import FireSpreadDataset
 from pathlib import Path
 
 import h5py
 from tqdm import tqdm
 
-sys.path.append(os.path.abspath(os.path.dirname(__file__).split("/src")[-2]))
 
 
 parser = argparse.ArgumentParser()
