@@ -15,8 +15,6 @@ metric:
   name: test_AP
 parameters:
   # Chosen to have each year as the test set once
-  trainer.devices:
-    value: [3]
   data.data_fold_id:
     values:
       - 0
@@ -40,6 +38,16 @@ parameters:
     values:
       - 1
       - 5
+  optimizer.lr:
+    value: 0.001
+  model.init_args.encoder_weights:
+    value: imagenet
+  model.init_args.loss_function:
+    value: Focal
+  model.init_args.f1_threshold:
+    values:
+      - 0.1
+      - 0.5
   data.remove_duplicate_features:
     value: true
   trainer.max_steps: 
