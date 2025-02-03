@@ -28,6 +28,7 @@ class BaseModel(pl.LightningModule, ABC):
         crop_before_eval: bool = False,
         required_img_size: Optional[Tuple[int, int]] = None,
         alpha_focal: Optional[float] = None,
+        f1_threshold: Optional[float] = None,
         *args: Any,
         **kwargs: Any
     ):
@@ -58,10 +59,13 @@ class BaseModel(pl.LightningModule, ABC):
             self.hparams.pos_class_weight /= 1 + self.hparams.pos_class_weight
 
         self.loss = self.get_loss()
-
-        self.train_f1 = torchmetrics.F1Score("binary")
+        if self.hparams.f1_threshold:
+            self.train_f1 = torchmetrics.F1Score("binary", threshold=self.hparams.f1_threshold)
+        else:
+            self.train_f1 = torchmetrics.F1Score("binary")
         self.val_f1 = self.train_f1.clone()
         self.test_f1 = self.train_f1.clone()
+        
 
         self.test_avg_precision = torchmetrics.AveragePrecision("binary")
 
