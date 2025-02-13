@@ -45,9 +45,7 @@ parameters:
   model.init_args.loss_function:
     value: Focal
   model.init_args.f1_threshold:
-    values:
-      - 0.1
-      - 0.5
+    value: 0.1
   data.remove_duplicate_features:
     value: true
   trainer.max_steps: 
