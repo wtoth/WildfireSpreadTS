@@ -14,6 +14,8 @@ metric:
   goal: maximize
   name: val_avg_precision.max
 parameters:
+  trainer.devices:
+    value: [3]
   optimizer.lr:
     values:
       - 0.1
@@ -23,7 +25,6 @@ parameters:
       - 1e-05
   model.init_args.encoder_weights:
     values:
-      - none
       - imagenet
   model.init_args.loss_function:
     values:
@@ -37,4 +38,6 @@ parameters:
     value: 50
   do_test:
     value: False
+  data.data_dir: 
+    value: /home/sl221120/scratch/WildfireSpreadTS_HDF5
 program: src/train.py

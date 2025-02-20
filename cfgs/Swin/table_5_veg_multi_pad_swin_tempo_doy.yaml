@@ -33,7 +33,7 @@ parameters:
   data.n_leading_observations:
     value: 5
   data.remove_duplicate_features:
-    value: false
+    value: true
   data.return_doy:
     value: true
   do_test:

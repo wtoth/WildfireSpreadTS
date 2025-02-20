@@ -6,5 +6,5 @@ load_from_hdf5: true
 num_workers: 8
 remove_duplicate_features: false
 n_leading_observations_test_adjustment: 5
-features_to_keep: [0,1,2,38,39]
+features_to_keep: null
 return_doy: true
