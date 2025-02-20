@@ -7,6 +7,7 @@ import torch
 import torch.nn as nn
 import torchmetrics
 import wandb
+import numpy as np
 import torchvision.transforms.functional as TF
 from segmentation_models_pytorch.losses import (DiceLoss, JaccardLoss,
                                                 LovaszLoss)
@@ -304,21 +305,25 @@ class BaseModel(pl.LightningModule, ABC):
         #)
         #wandb.log({"Test confusion matrix": wandb_table})
 
-        #fig, ax = self.test_pr_curve.plot(score=True)
+        fig, ax = self.test_pr_curve.plot(score=True)
 
         # # Compute precision and recall
-        # precision, recall, thresholds = self.test_pr_curve.compute()
+        precision, recall, thresholds = self.test_pr_curve.compute()
 
         # # Move tensors to CPU
-        # precision = precision.cpu().numpy()
-        # recall = recall.cpu().numpy()
+        precision = precision.cpu().numpy()
+        recall = recall.cpu().numpy()
+        thresholds = thresholds.cpu().numpy()
+
+        np.savez("test_pr_curve_data.npz", precision=precision, recall=recall, thresholds=thresholds)
 
         # # Plot the PR curve using Matplotlib
-        # fig, ax = plt.subplots() 
-        # ax.plot(recall, precision, marker='.')
-        # ax.set_xlabel('Recall')
-        # ax.set_ylabel('Precision')
-        # ax.set_title('Precision-Recall Curve')
+        fig, ax = plt.subplots() 
+        ax.plot(recall, precision, marker='.')
+        ax.set_xlabel('Recall')
+        ax.set_ylabel('Precision')
+        ax.set_title('Precision-Recall Curve')
+        
         #wandb.log({"Test PR Curve": wandb.Image(fig)})
 
     def predict_step(self, batch, batch_idx, dataloader_idx=0):

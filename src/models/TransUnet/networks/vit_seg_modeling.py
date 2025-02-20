@@ -142,7 +142,7 @@ class Embeddings(nn.Module):
             self.hybrid = False
 
         if self.hybrid:
-            self.hybrid_model = ResNetV2(block_units=config.resnet.num_layers, width_factor=config.resnet.width_factor)
+            self.hybrid_model = ResNetV2(block_units=config.resnet.num_layers, width_factor=config.resnet.width_factor, in_channels=in_channels)
             in_channels = self.hybrid_model.width * 16
         self.patch_embeddings = Conv2d(in_channels=in_channels,
                                        out_channels=config.hidden_size,
@@ -397,9 +397,14 @@ class VisionTransformer(nn.Module):
 
             res_weight = weights
             if "embedding/kernel" in weights and "embedding/bias" in weights:
-                self.transformer.embeddings.patch_embeddings.weight.copy_(np2th(weights["embedding/kernel"], conv=True))
-                self.transformer.embeddings.patch_embeddings.bias.copy_(np2th(weights["embedding/bias"]))
-
+                kernel_weight = np2th(weights["embedding/kernel"], conv=True)
+                model_embed = self.transformer.embeddings.patch_embeddings
+                if kernel_weight.size(1) == model_embed.in_channels:    
+                    model_embed.weight.copy_(kernel_weight)
+                    self.transformer.embeddings.patch_embeddings.bias.copy_(np2th(weights["embedding/bias"]))
+                else:
+                    print("Skipping loading embedding/kernel: pretrained weight expects {} channels, but model embedding has {} channels."
+                      .format(kernel_weight.size(1), model_embed.in_channels))
             self.transformer.encoder.encoder_norm.weight.copy_(np2th(weights["Transformer/encoder_norm/scale"]))
             self.transformer.encoder.encoder_norm.bias.copy_(np2th(weights["Transformer/encoder_norm/bias"]))
 
@@ -432,7 +437,13 @@ class VisionTransformer(nn.Module):
                     unit.load_from(weights, n_block=uname)
 
             if self.transformer.embeddings.hybrid:
-                self.transformer.embeddings.hybrid_model.root.conv.weight.copy_(np2th(res_weight["conv_root/kernel"], conv=True))
+                conv_weight = np2th(res_weight["conv_root/kernel"], conv=True)
+                model_conv = self.transformer.embeddings.hybrid_model.root.conv
+                if conv_weight.size(1) == model_conv.in_channels:
+                    model_conv.weight.copy_(conv_weight)
+                else:
+                    print("Skipping loading conv_root/kernel: pretrained weight expects {} channels, but model conv has {} channels."
+                      .format(conv_weight.size(1), model_conv.in_channels))
                 gn_weight = np2th(res_weight["gn_root/scale"]).view(-1)
                 gn_bias = np2th(res_weight["gn_root/bias"]).view(-1)
                 self.transformer.embeddings.hybrid_model.root.gn.weight.copy_(gn_weight)

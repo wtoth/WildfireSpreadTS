@@ -3,8 +3,8 @@ from typing import Any
 import numpy as np
 
 from .BaseModel import BaseModel
-from networks.vit_seg_modeling import VisionTransformer as TransUnet
-from networks.vit_seg_modeling import CONFIGS as CONFIGS_ViT_seg
+from .TransUnet.networks.vit_seg_modeling import VisionTransformer as TransUnet
+from .TransUnet.networks.vit_seg_modeling import CONFIGS as CONFIGS_ViT_seg
 
 
 class TransUnetLightning(BaseModel):
@@ -46,8 +46,4 @@ class TransUnetLightning(BaseModel):
 
         if encoder_weights == "imagenet":
             weights = np.load(config_vit.pretrained_path, allow_pickle=True)
-            if n_channels != 3:
-                # Remove the patch embedding weights so they are not loaded.
-                weights.pop("embedding/kernel", None)
-                weights.pop("embedding/bias", None)
             self.model.load_from(weights)
