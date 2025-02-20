@@ -14,8 +14,6 @@ metric:
   goal: maximize
   name: test_AP
 parameters:
-  trainer.devices: 
-    value: [3]
   data.data_fold_id:
     values:
       - 0
