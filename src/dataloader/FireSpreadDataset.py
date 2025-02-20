@@ -34,7 +34,7 @@ class FireSpreadDataset(Dataset):
         In practice, this means that if n_leading_observations is smaller than this value, some samples are skipped. Defaults to None. If None, nothing is skipped. This is especially used for the train and val set. 
             features_to_keep (Optional[List[int]], optional): _description_. List of feature indices from 0 to 39, indicating which features to keep. Defaults to None, which means using all features.
             return_doy (bool, optional): _description_. Return the day of the year per time step, as an additional feature. Defaults to False.
-            is_pad (book, optional): _description_. Whether to zero-pad image to 224x224 for SwinUnet
+            is_pad (book, optional): _description_. Whether to zero-pad image to 224x224 for SwinUnet/TransUnet
         Raises:
             ValueError: _description_ Raised if input values are not in the expected ranges.
         """

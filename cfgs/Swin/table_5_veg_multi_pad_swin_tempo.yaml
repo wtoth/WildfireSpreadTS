@@ -14,8 +14,6 @@ metric:
   goal: maximize
   name: test_AP
 parameters:
-  trainer.devices: 
-    value: [2]
   data.data_fold_id:
     values:
       - 0
@@ -24,12 +22,18 @@ parameters:
       - 3
       - 4
       - 5
+      - 6
+      - 7
+      - 8
+      - 9
+      - 10
+      - 11
   data.features_to_keep:
     value: [0, 1, 2, 3, 4, 38, 39]
   data.n_leading_observations:
     value: 5
   data.remove_duplicate_features:
-    value: false
+    value: true
   do_test:
     value: true
   trainer.max_steps:
