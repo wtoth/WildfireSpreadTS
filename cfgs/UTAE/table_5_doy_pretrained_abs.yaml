@@ -29,7 +29,7 @@ parameters:
       - 10
       - 11
   data.features_to_keep:
-    values: [0, 1, 2, 3, 4, 38, 39]
+    value: [0, 1, 2, 3, 4, 38, 39]
   data.n_leading_observations:
     value: 5
   data.remove_duplicate_features:
