@@ -47,7 +47,7 @@ class UTAELightningDumb(BaseModel):
         )
         encoder_weights = encoder_weights if encoder_weights != "none" else None
         if encoder_weights == "pastis": 
-            pretrained_checkpoint = '/home/sl221120/WildfireSpreadTS/src/models/utae_paps_models/model.pth.tar'
+            pretrained_checkpoint =  '/develop/data/utae_pre/model.pth.tar'
             self.load_checkpoint(pretrained_checkpoint)
    
     def load_checkpoint(self, checkpoint_path: str) -> None:

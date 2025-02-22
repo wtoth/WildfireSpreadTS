@@ -323,7 +323,8 @@ class BaseModel(pl.LightningModule, ABC):
         ax.set_xlabel('Recall')
         ax.set_ylabel('Precision')
         ax.set_title('Precision-Recall Curve')
-        wandb.log({"Test PR Curve": wandb.Image(fig)})
+        
+        #wandb.log({"Test PR Curve": wandb.Image(fig)})
 
     def predict_step(self, batch, batch_idx, dataloader_idx=0):
         x, y = batch
