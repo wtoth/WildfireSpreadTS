@@ -21,6 +21,8 @@ parameters:
       - 0.001
       - 0.0001
       - 1e-05
+  model.init_args.encoder_name:
+    value: resnet50
   model.init_args.encoder_weights:
     values:
       - none
