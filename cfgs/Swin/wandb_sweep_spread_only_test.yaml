@@ -47,9 +47,9 @@ parameters:
   data.remove_duplicate_features:
     value: True
   data.filter_ignition_train: 
-    value: True
-  data.filter_ignition_val_test: 
     value: False
+  data.filter_ignition_val_test: 
+    value: True
   trainer.max_steps: 
     value: 10000
 program: src/train.py
