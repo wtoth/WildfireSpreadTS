@@ -88,8 +88,11 @@ class FireSpreadDataModule(LightningDataModule):
         kept = 0
         for idx in range(total_samples):
             sample = dataset[idx]
-            inputs = sample[0]  # Shape: [1, 7, 128, 128]
-            x_af = inputs[:, -1, :, :]  # Active fire mask
+            inputs = sample[0]  # Shape: [1, 7, 128, 128] if T=1; but [5*N, 128, 128] if T=5, where N is the number of features
+            if len(inputs.shape) == 3:
+                x_af = inputs[-1, :, :]
+            else:
+                x_af = inputs[:, -1, :, :]  # Active fire mask
             
             # Check current fire presence
             if torch.sum(x_af == 1) > 1:  # Original filtering condition
