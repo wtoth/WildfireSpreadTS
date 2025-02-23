@@ -17,7 +17,7 @@ class FireSpreadDataModule(LightningDataModule):
                  is_pad: Optional[bool] = False,
                  features_to_keep: Union[Optional[List[int]], str] = None, return_doy: bool = False,
                  data_fold_id: int = 0, non_outlier_indices_path: Optional[str] = None, filter_ignition_train: Optional[bool] = False, filter_ignition_val_test: Optional[bool] = False,
-                 ignition_only_train: Optional[bool] = False, ignition_only_val_test: Optional[bool] = False, *args, **kwargs):
+                 ignition_only_train: Optional[bool] = False, ignition_only_val_test: Optional[bool] = False, additional_data: Optional[bool] = False, *args, **kwargs):
         """_summary_ Data module for loading the WildfireSpreadTS dataset.
 
         Args:
@@ -59,6 +59,7 @@ class FireSpreadDataModule(LightningDataModule):
         self.filter_ignition_val_test = filter_ignition_val_test
         self.ignition_only_train = ignition_only_train
         self.ignition_only_val_test = ignition_only_val_test
+        self.additional_data = additional_data
 
 
     def keep_ignition(self, dataset):
@@ -108,7 +109,7 @@ class FireSpreadDataModule(LightningDataModule):
         
     def setup(self, stage):
         train_years, val_years, test_years = self.split_fires(
-            self.data_fold_id)
+            self.data_fold_id, self.additional_data)
         self.train_dataset = FireSpreadDataset(data_dir=self.data_dir, included_fire_years=train_years,
                                                n_leading_observations=self.n_leading_observations,
                                                n_leading_observations_test_adjustment=None,
@@ -168,7 +169,7 @@ class FireSpreadDataModule(LightningDataModule):
         return DataLoader(self.val_dataset, batch_size=self.batch_size, shuffle=False, num_workers=self.num_workers, pin_memory=True)
 
     @staticmethod
-    def split_fires(data_fold_id):
+    def split_fires(data_fold_id, additional_data):
         """_summary_ Split the years into train/val/test set.
 
         Args:
@@ -177,8 +178,9 @@ class FireSpreadDataModule(LightningDataModule):
         Returns:
             _type_: _description_
         """
+        if not additional_data:
 
-        folds = [(2018, 2019, 2020, 2021),
+            folds = [(2018, 2019, 2020, 2021),
                  (2018, 2019, 2021, 2020),
                  (2018, 2020, 2019, 2021),
                  (2018, 2020, 2021, 2019),
@@ -190,10 +192,26 @@ class FireSpreadDataModule(LightningDataModule):
                  (2019, 2021, 2020, 2018),
                  (2020, 2021, 2018, 2019),
                  (2020, 2021, 2019, 2018)]
-
-        train_years = list(folds[data_fold_id][:2])
-        val_years = list(folds[data_fold_id][2:3])
-        test_years = list(folds[data_fold_id][3:4])
+            train_years = list(folds[data_fold_id][:2])
+            val_years = list(folds[data_fold_id][2:3])
+            test_years = list(folds[data_fold_id][3:4])
+        
+        else:
+            folds = [(2016, 2017, 2022, 2023, 2018, 2019, 2020, 2021),
+                 (2016, 2017, 2022, 2023, 2018, 2019, 2021, 2020),
+                 (2016, 2017, 2022, 2023, 2018, 2020, 2019, 2021),
+                 (2016, 2017, 2022, 2023, 2018, 2020, 2021, 2019),
+                 (2016, 2017, 2022, 2023, 2018, 2021, 2019, 2020),
+                 (2016, 2017, 2022, 2023, 2018, 2021, 2020, 2019),
+                 (2016, 2017, 2022, 2023, 2019, 2020, 2018, 2021),
+                 (2016, 2017, 2022, 2023, 2019, 2020, 2021, 2018),
+                 (2016, 2017, 2022, 2023, 2019, 2021, 2018, 2020),
+                 (2016, 2017, 2022, 2023, 2019, 2021, 2020, 2018),
+                 (2016, 2017, 2022, 2023, 2020, 2021, 2018, 2019),
+                 (2016, 2017, 2022, 2023, 2020, 2021, 2019, 2018)]
+            train_years = list(folds[data_fold_id][:6])
+            val_years = list(folds[data_fold_id][6:7])
+            test_years = list(folds[data_fold_id][7:8])
 
         print(
             f"Using the following dataset split:\nTrain years: {train_years}, Val years: {val_years}, Test years: {test_years}")
