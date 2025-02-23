@@ -37,7 +37,9 @@ class TransUnetLightning(BaseModel):
         config_vit = CONFIGS_ViT_seg[vit_name]
         config_vit.n_classes = 1  
         config_vit.n_skip = n_skip
-        config_vit.pretrained_path = '/develop/data/imagenet21k_R50+ViT-B_16.npz'
+        primary_ckpt = '/develop/data/imagenet21k_R50+ViT-B_16.npz'
+        secondary_ckpt = '/home/sl221120/WildfireSpreadTS/src/models/TransUnet/imagenet21k_R50+ViT-B_16.npz'
+        config_vit.pretrained_path = primary_ckpt if os.path.exists(primary_ckpt) else secondary_ckpt
 
         if "R50" in vit_name:
             config_vit.patches.grid = (int(img_size / vit_patches_size), int(img_size / vit_patches_size))

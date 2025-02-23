@@ -47,7 +47,9 @@ class UTAELightning(BaseModel):
         )
         encoder_weights = encoder_weights if encoder_weights != "none" else None
         if encoder_weights == "pastis": 
-            pretrained_checkpoint = '/develop/data/utae_pre/model.pth.tar'
+            primary_ckpt = '/develop/data/utae_pre/model.pth.tar'
+            secondary_ckpt = '/home/sl221120/WildfireSpreadTS/src/models/utae_paps_models/model.pth.tar'
+            pretrained_checkpoint = primary_ckpt if os.path.exists(primary_ckpt) else secondary_ckpt
             self.load_checkpoint(pretrained_checkpoint)
 
 

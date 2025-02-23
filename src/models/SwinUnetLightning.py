@@ -38,8 +38,9 @@ class SwinUnetLightning(BaseModel):
                 LABEL_SMOOTHING = 0.1
                 NAME = 'swin_tiny_patch4_window7_224'
                 if encoder_weights == "imagenet":
-                    PRETRAIN_CKPT = '/develop/data/swin_tiny_patch4_window7_224.pth'
-                    #PRETRAIN_CKPT = 'src/models/SwinUnet/networks/swin_tiny_patch4_window7_224.pth'
+                    primary_ckpt = '/develop/data/swin_tiny_patch4_window7_224.pth'
+                    secondary_ckpt = 'src/models/SwinUnet/networks/swin_tiny_patch4_window7_224.pth'
+                    PRETRAIN_CKPT = primary_ckpt if os.path.exists(primary_ckpt) else secondary_ckpt
                 else:
                     PRETRAIN_CKPT = None
                 
