@@ -14,6 +14,8 @@ metric:
   goal: maximize
   name: test_AP
 parameters:
+  data.data_dir:
+    value: /develop/data/WildfireSpreadTS_HDF5
   optimizer.lr:
     value: 0.001
   model.init_args.encoder_weights:
