@@ -39,7 +39,7 @@ class SwinUnetLightning(BaseModel):
                 NAME = 'swin_tiny_patch4_window7_224'
                 if encoder_weights == "imagenet":
                     primary_ckpt = '/develop/data/swin_tiny_patch4_window7_224.pth'
-                    secondary_ckpt = 'src/models/SwinUnet/networks/swin_tiny_patch4_window7_224.pth'
+                    secondary_ckpt = '/home/sl221120/develop/data/swin_tiny_patch4_window7_224.pth'
                     PRETRAIN_CKPT = primary_ckpt if os.path.exists(primary_ckpt) else secondary_ckpt
                 else:
                     PRETRAIN_CKPT = None

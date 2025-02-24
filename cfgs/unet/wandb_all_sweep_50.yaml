@@ -15,8 +15,6 @@ metric:
   name: test_AP
 parameters:
   # Chosen to have each year as the test set once
-  trainer.devices:
-    value: [3]
   data.data_fold_id:
     values:
       - 0
