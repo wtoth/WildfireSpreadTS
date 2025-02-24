@@ -394,7 +394,7 @@ class Temporal_Aggregator(nn.Module):
         else:
             if self.mode == "att_group":
                 n_heads, b, t, h, w = attn_mask.shape
-                attn = attn_mask.view(n_heads * b, t, h, w)
+                attn = attn_mask.contiguous().view(n_heads * b, t, h, w)
                 if x.shape[-2] > w:
                     attn = nn.Upsample(
                         size=x.shape[-2:], mode="bilinear", align_corners=False

@@ -12,6 +12,7 @@ model:
     pos_class_weight: 236
     loss_function: Focal
     crop_before_eval: true
+    encoder_weights: imagenet
 
 do_train: true
 do_test: true
