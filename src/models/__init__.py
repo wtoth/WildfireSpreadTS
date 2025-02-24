@@ -11,3 +11,4 @@ from .SwinUnetTempLightning import SwinUnetTempLightning
 from .SwinUnetTempDumbLightning import SwinUnetTempDumbLightning
 from .UTAELightningDumb import UTAELightningDumb
 from .TransUnetLightning import TransUnetLightning
+from .SMPTempModel import SMPTempModel 
