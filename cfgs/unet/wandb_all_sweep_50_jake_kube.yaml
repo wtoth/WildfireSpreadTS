@@ -18,7 +18,7 @@ parameters:
   model.init_args.encoder_name:
     value: resnet50
   data.data_dir:
-    value: /develop/data/new_fires_50km_neighbor"
+    value: /develop/data/new_fires_50km_neighbor
   data.additional_data:
     value: True
   data.data_fold_id:
