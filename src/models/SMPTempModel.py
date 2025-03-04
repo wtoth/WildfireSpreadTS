@@ -25,7 +25,7 @@ class SMPTempModel(BaseModel):
             n_channels=n_channels,
             flatten_temporal_dimension=flatten_temporal_dimension,
             pos_class_weight=pos_class_weight,
-            use_doy=False, 
+            use_doy=True, 
             *args,
             **kwargs
         )
@@ -82,3 +82,21 @@ class SMPTempModel(BaseModel):
         decoder_output = self.model.decoder(*decoder_features)
         masks = self.model.segmentation_head(decoder_output)
         return masks
+    
+    def load_state_dict(self, state_dict, strict=True):
+        conv1_key = "model.encoder.conv1.weight"
+        if conv1_key in state_dict:
+            pretrained_weight = state_dict[conv1_key]
+            current_weight = self.state_dict()[conv1_key]
+            # Check if there is a channel mismatch.
+            if pretrained_weight.shape[1] != current_weight.shape[1]:
+                print("Replicating the conv1 weight")
+                # Calculate the replication factor (e.g., 35 / 7 = 5)
+                factor = current_weight.shape[1] // pretrained_weight.shape[1]
+                # Repeat the pretrained weights along the channel dimension
+                # and divide by the factor to preserve the scale.
+                adapted_weight = pretrained_weight.repeat(1, factor, 1, 1) / factor
+                state_dict[conv1_key] = adapted_weight
+        # Load the updated state dict
+        super().load_state_dict(state_dict, strict=strict)
+
