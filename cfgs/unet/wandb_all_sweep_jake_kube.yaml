@@ -15,10 +15,6 @@ metric:
   name: test_AP
 parameters:
   # Chosen to have each year as the test set once
-  model.class_path:
-    value: models.SMPTemp
-  trainer.devices:
-    value: [2]
   data.data_dir:
     value: /develop/data/new_fires_50km_neighbor"
   data.additional_data:
