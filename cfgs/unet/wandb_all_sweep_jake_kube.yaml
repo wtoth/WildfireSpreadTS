@@ -16,7 +16,7 @@ metric:
 parameters:
   # Chosen to have each year as the test set once
   data.data_dir:
-    value: /develop/data/new_fires_50km_neighbor"
+    value: /develop/data/new_fires_50km_neighbor
   data.additional_data:
     value: True
   data.data_fold_id:
