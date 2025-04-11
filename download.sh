@@ -1,0 +1,1 @@
+curl https://zenodo.org/records/8006177/files/WildfireSpreadTS.zip > wildfire_data.zip
